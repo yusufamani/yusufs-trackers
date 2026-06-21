@@ -1,13 +1,13 @@
 // Offline service worker for Yusuf's Trackers.
 // Bump CACHE when you change index.html so users get the update.
-const CACHE = "yt-v4";
+const CACHE = "yt-v5";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./apple-touch-icon.png",
+  "./icon-192-v2.png",
+  "./icon-512-v2.png",
+  "./apple-touch-icon-v2.png",
 ];
 
 self.addEventListener("install", (e) => {
