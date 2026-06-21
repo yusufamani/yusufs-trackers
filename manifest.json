@@ -1,7 +1,7 @@
 {
-  "name": "Yusuf's Trackers",
-  "short_name": "Trackers",
-  "description": "Lift Log + Goal Log — train the body, build the dream.",
+  "name": "Dreamy",
+  "short_name": "Dreamy",
+  "description": "Train the body, build the dream — Lift Log + Goal Log.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -1,6 +1,6 @@
 // Offline service worker for Yusuf's Trackers.
 // Bump CACHE when you change index.html so users get the update.
-const CACHE = "yt-v2";
+const CACHE = "yt-v3";
 const ASSETS = [
   "./",
   "./index.html",
