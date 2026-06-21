@@ -1,6 +1,6 @@
 // Offline service worker for Yusuf's Trackers.
 // Bump CACHE when you change index.html so users get the update.
-const CACHE = "yt-v1";
+const CACHE = "yt-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,13 +27,27 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then((cached) =>
-      cached ||
-      fetch(e.request).then((resp) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const isDoc = req.mode === "navigate" || req.destination === "document";
+  if (isDoc) {
+    // Network-first for the app itself, so updates show up when online.
+    e.respondWith(
+      fetch(req).then((resp) => {
         const copy = resp.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy));
+        caches.open(CACHE).then((c) => c.put(req, copy));
+        return resp;
+      }).catch(() => caches.match(req).then((r) => r || caches.match("./index.html")))
+    );
+    return;
+  }
+  // Cache-first for static assets (icons, manifest).
+  e.respondWith(
+    caches.match(req).then((cached) =>
+      cached ||
+      fetch(req).then((resp) => {
+        const copy = resp.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
         return resp;
       }).catch(() => caches.match("./index.html"))
     )

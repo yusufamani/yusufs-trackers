@@ -364,18 +364,18 @@
   /* ---------- Home launcher ---------- */
   .launch { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
   .launch-card {
-    width: 100%; text-align: left; color: var(--text); border-radius: 20px; padding: 22px;
-    border: 1px solid var(--line); position: relative; min-height: 150px;
-    display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
+    width: 100%; text-align: left; color: var(--text); border-radius: 20px; padding: 20px;
+    border: 1px solid var(--line); min-height: 138px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0;
   }
   .launch-card:active { transform: scale(0.99); }
   .launch-card.lift { background: linear-gradient(140deg, #241f3d, #171a21); border-color: #3a2f63; }
   .launch-card.goal { background: linear-gradient(140deg, #152b2a, #171a21); border-color: #1f4d44; }
-  .launch-card .lc-emoji { font-size: 34px; position: absolute; top: 18px; left: 20px; }
-  .lc-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
-  .lc-sub { font-size: 14px; color: var(--muted); }
-  .lc-prog { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--accent-2); }
-  .launch-card.plan { background: linear-gradient(140deg, #3a2a12, #171a21); border-color: #5a3f1c; min-height: 120px; }
+  .launch-card.plan { background: linear-gradient(140deg, #3a2a12, #171a21); border-color: #5a3f1c; }
+  .launch-card .lc-emoji { font-size: 32px; line-height: 1; margin-bottom: 12px; }
+  .lc-title { font-size: 23px; font-weight: 800; letter-spacing: -0.02em; }
+  .lc-sub { font-size: 14px; color: var(--muted); margin-top: 3px; }
+  .lc-prog { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--accent-2); }
 
   /* ---------- Launch strategy page ---------- */
   .plan-card h4 { margin: 0 0 3px; font-size: 17px; letter-spacing: -0.01em; }
