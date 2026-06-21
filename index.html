@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0f1115" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Trackers" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="icon-192.png" />
+<title>Yusuf's Trackers</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --bg-elev: #171a21;
+    --card: #1b1f28;
+    --card-2: #232834;
+    --line: #2c3240;
+    --text: #eef1f6;
+    --muted: #97a0b0;
+    --faint: #6b7382;
+    --accent: #7c5cff;
+    --accent-2: #9d86ff;
+    --accent-ink: #ffffff;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --radius: 16px;
+    --radius-sm: 11px;
+    --tap: 46px;
+    --maxw: 480px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
+  }
+  #app {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    min-height: 100%;
+    position: relative;
+    background: var(--bg);
+  }
+
+  /* ---------- Header ---------- */
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: linear-gradient(180deg, rgba(15,17,21,0.97), rgba(15,17,21,0.86));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: calc(var(--safe-top) + 12px) 16px 12px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+  }
+  header.top .title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  header.top .sub { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .back-btn {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--text);
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .head-action {
+    background: none; border: none; color: var(--accent-2);
+    font-size: 15px; font-weight: 600; padding: 6px 4px;
+  }
+
+  /* ---------- Layout ---------- */
+  main {
+    padding: 16px 16px calc(96px + var(--safe-bottom));
+  }
+  .view { animation: fade .18s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .section-label {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--faint); font-weight: 700; margin: 22px 2px 10px;
+  }
+  .section-label:first-child { margin-top: 4px; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .stack > * + * { margin-top: 10px; }
+
+  .row-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px 14px;
+    width: 100%;
+    text-align: left;
+    color: var(--text);
+  }
+  .row-card:active { background: var(--card-2); }
+  .row-card .glyph {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--card-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex: 0 0 auto;
+  }
+  .row-card .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .row-card .name { display: block; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; }
+  .row-card .meta { font-size: 13px; color: var(--muted); margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-card .chev { color: var(--faint); font-size: 20px; flex: 0 0 auto; }
+
+  /* ---------- Exercise images ---------- */
+  .ex-thumb {
+    width: 46px; height: 46px; border-radius: 11px; flex: 0 0 auto;
+    object-fit: cover; background: var(--card-2); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--faint);
+  }
+  .ex-thumb.sm { width: 38px; height: 38px; border-radius: 10px; font-size: 18px; }
+  .rm-ex {
+    width: 30px; height: 30px; border-radius: 50%; border: none; flex: 0 0 auto;
+    background: var(--danger); color: #fff; font-size: 24px; font-weight: 400; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rm-ex:active { transform: scale(0.92); }
+  .hero-img {
+    width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block;
+    border-radius: var(--radius); border: 1px solid var(--line); background: var(--card-2); margin-bottom: 14px;
+  }
+  .add-photo {
+    width: 100%; aspect-ratio: 16 / 10; border-radius: var(--radius); margin-bottom: 14px;
+    border: 1px dashed var(--line); background: var(--card); color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 600;
+  }
+  .add-photo .ph { font-size: 30px; }
+  .img-preview { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--card-2); margin-top: 4px; }
+
+  /* ---------- Routine big cards ---------- */
+  .routine-card {
+    border-radius: var(--radius);
+    padding: 18px;
+    background: linear-gradient(135deg, var(--card-2), var(--card));
+    border: 1px solid var(--line);
+    width: 100%; text-align: left; color: var(--text);
+    position: relative; overflow: hidden;
+  }
+  .routine-card:active { transform: scale(0.99); }
+  .routine-card .rname { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+  .routine-card .rmeta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .routine-card .rtags { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--line); color: var(--muted);
+  }
+  .routine-card .startpill {
+    position: absolute; top: 16px; right: 14px;
+    font-size: 12px; font-weight: 700; color: var(--accent-2);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    appearance: none; border: 1px solid var(--line);
+    background: var(--card); color: var(--text);
+    border-radius: 12px; padding: 0 16px; min-height: var(--tap);
+    font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%;
+  }
+  .btn:active { transform: scale(0.99); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:active { background: var(--accent-2); }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: var(--danger); border-color: rgba(248,113,113,0.35); background: rgba(248,113,113,0.06); }
+  .btn.sm { min-height: 38px; font-size: 14px; padding: 0 12px; width: auto; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row > .btn { flex: 1; }
+
+  .fab {
+    position: fixed; right: max(16px, calc((100% - var(--maxw))/2 + 16px));
+    bottom: calc(82px + var(--safe-bottom));
+    width: 56px; height: 56px; border-radius: 18px;
+    background: var(--accent); color: #fff; border: none;
+    font-size: 28px; font-weight: 300; z-index: 30;
+    box-shadow: 0 8px 24px rgba(124,92,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fab[hidden] { display: none; }
+  .fab:active { transform: scale(0.95); }
+
+  /* ---------- Stats / detail ---------- */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 12px 10px; text-align: center;
+  }
+  .stat .val { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .stat .lbl { font-size: 11px; color: var(--faint); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+  .stat .val.accent { color: var(--accent-2); }
+
+  .sess {
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 12px 14px; background: var(--card);
+  }
+  .sess .date { font-size: 13px; font-weight: 700; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+  .sess .date .vol { color: var(--faint); font-weight: 600; font-size: 12px; }
+  .sess .sets { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .setchip {
+    font-size: 13px; font-weight: 600; padding: 5px 9px; border-radius: 9px;
+    background: var(--card-2); border: 1px solid var(--line);
+  }
+  .setchip b { color: var(--accent-2); font-weight: 800; }
+  .sess .note { margin-top: 8px; font-size: 13px; color: var(--muted); font-style: italic; }
+
+  .empty {
+    text-align: center; color: var(--faint); padding: 40px 20px;
+  }
+  .empty .big { font-size: 40px; margin-bottom: 10px; }
+  .empty .msg { font-size: 15px; color: var(--muted); }
+
+  /* ---------- Forms ---------- */
+  label.field { display: block; margin-top: 14px; }
+  label.field .l { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; background: var(--bg-elev); border: 1px solid var(--line);
+    color: var(--text); border-radius: 11px; padding: 12px 13px; font-size: 16px;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+
+  /* set editor */
+  .set-edit { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .set-edit .idx { width: 22px; color: var(--faint); font-weight: 700; font-size: 14px; flex: 0 0 auto; text-align: center; }
+  .stepper {
+    display: flex; align-items: center; gap: 0; flex: 1;
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden;
+  }
+  .stepper button {
+    width: 40px; height: 48px; border: none; background: transparent;
+    color: var(--accent-2); font-size: 22px; font-weight: 400; flex: 0 0 auto;
+  }
+  .stepper button:active { background: var(--card-2); }
+  .stepper .num {
+    flex: 1; text-align: center; border: none; background: transparent;
+    color: var(--text); font-size: 17px; font-weight: 700; padding: 0; min-width: 0;
+    -moz-appearance: textfield;
+  }
+  .stepper .num::-webkit-outer-spin-button, .stepper .num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper .unit { color: var(--faint); font-size: 11px; font-weight: 700; padding-right: 10px; }
+  .set-edit .rm { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--danger); font-size: 18px; flex: 0 0 auto; }
+  .set-head { display: flex; gap: 8px; padding-left: 30px; margin-top: 6px; }
+  .set-head span { flex: 1; font-size: 11px; color: var(--faint); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
+
+  /* checkbox list for routine builder */
+  .check-row {
+    display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+    border: 1px solid var(--line); border-radius: 11px; background: var(--card); margin-top: 8px;
+  }
+  .check-row.on { border-color: var(--accent); background: rgba(124,92,255,0.08); }
+  .check-row .box {
+    width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line);
+    flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: 15px; color: transparent;
+  }
+  .check-row.on .box { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .check-row .nm { flex: 1; font-weight: 500; }
+  .check-row .ct { font-size: 12px; color: var(--faint); }
+
+  /* session screen exercise block */
+  .sx {
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
+    margin-top: 12px; overflow: hidden;
+  }
+  .sx .sxhead { display: flex; align-items: center; gap: 12px; padding: 14px; }
+  .sx .sxhead .nm { flex: 1; font-weight: 600; }
+  .sx .sxhead .done { color: var(--good); font-size: 20px; }
+  .sx .last { font-size: 12px; color: var(--muted); padding: 0 14px 12px; margin-top: -4px; }
+  .sx .last b { color: var(--text); }
+
+  /* ---------- Bottom tab bar ---------- */
+  nav.tabs {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 25;
+    max-width: var(--maxw); margin: 0 auto;
+    background: rgba(20,23,30,0.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--line);
+    display: flex; padding: 6px 6px calc(6px + var(--safe-bottom));
+  }
+  nav.tabs button {
+    flex: 1; background: none; border: none; color: var(--faint);
+    padding: 7px 0 4px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 600;
+  }
+  nav.tabs button .ic {
+    font-size: 21px; line-height: 1; filter: grayscale(1) opacity(0.65);
+  }
+  nav.tabs button.active { color: var(--accent-2); }
+  nav.tabs button.active .ic { filter: none; }
+
+  /* ---------- Sheet / modal ---------- */
+  .sheet-bg {
+    position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.55);
+    display: flex; align-items: flex-end; justify-content: center;
+    animation: fade .15s ease;
+  }
+  .sheet {
+    background: var(--bg-elev); width: 100%; max-width: var(--maxw);
+    border-radius: 22px 22px 0 0; border: 1px solid var(--line); border-bottom: none;
+    padding: 8px 16px calc(20px + var(--safe-bottom));
+    max-height: 90vh; overflow-y: auto;
+    animation: slideup .22s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes slideup { from { transform: translateY(100%); } to { transform: none; } }
+  .sheet .grip { width: 38px; height: 4px; border-radius: 99px; background: var(--line); margin: 8px auto 14px; }
+  .sheet h3 { margin: 0 0 4px; font-size: 19px; letter-spacing: -0.02em; }
+  .sheet .sub { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+
+  .toast {
+    position: fixed; bottom: calc(96px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+    background: var(--card-2); color: var(--text); border: 1px solid var(--line);
+    padding: 11px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 60;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: fade .15s ease;
+    max-width: 88%; text-align: center;
+  }
+
+  .inline-link { color: var(--accent-2); font-weight: 600; background: none; border: none; font-size: inherit; padding: 0; }
+  .muted { color: var(--muted); }
+  .center { text-align: center; }
+  .pb-badge { font-size: 11px; font-weight: 800; color: var(--warn); }
+  hr.div { border: none; border-top: 1px solid var(--line); margin: 16px 0; }
+
+  /* ---------- Home launcher ---------- */
+  .launch { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .launch-card {
+    width: 100%; text-align: left; color: var(--text); border-radius: 20px; padding: 22px;
+    border: 1px solid var(--line); position: relative; min-height: 150px;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
+  }
+  .launch-card:active { transform: scale(0.99); }
+  .launch-card.lift { background: linear-gradient(140deg, #241f3d, #171a21); border-color: #3a2f63; }
+  .launch-card.goal { background: linear-gradient(140deg, #152b2a, #171a21); border-color: #1f4d44; }
+  .launch-card .lc-emoji { font-size: 34px; position: absolute; top: 18px; left: 20px; }
+  .lc-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+  .lc-sub { font-size: 14px; color: var(--muted); }
+  .lc-prog { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--accent-2); }
+  .launch-card.plan { background: linear-gradient(140deg, #3a2a12, #171a21); border-color: #5a3f1c; min-height: 120px; }
+
+  /* ---------- Launch strategy page ---------- */
+  .plan-card h4 { margin: 0 0 3px; font-size: 17px; letter-spacing: -0.01em; }
+  .plan-card .pdesc { font-size: 14px; color: var(--muted); }
+  .lbadges { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 0; }
+  .lbadge { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+    background: var(--card-2); border: 1px solid var(--line); color: var(--muted); }
+  .lbadge.easy { color: var(--good); border-color: rgba(52,211,153,0.35); }
+  .lbadge.hard { color: var(--warn); border-color: rgba(251,191,36,0.35); }
+  .steps { margin: 10px 0 0; padding-left: 20px; }
+  .steps li { margin: 6px 0; font-size: 14px; line-height: 1.4; }
+  .steps code, .pcode { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 6px;
+    padding: 1px 6px; font-size: 12.5px; font-family: ui-monospace, Menlo, monospace; }
+  .pcallout { font-size: 13px; color: var(--muted); margin-top: 10px; padding: 10px 12px;
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; }
+  .pcallout b { color: var(--text); }
+
+  /* ---------- Date strip ---------- */
+  .datestrip { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 12px; scrollbar-width: none; }
+  .datestrip::-webkit-scrollbar { display: none; }
+  .daypill { flex: 0 0 auto; width: 50px; padding: 8px 0 9px; border-radius: 13px;
+    background: var(--card); border: 1px solid var(--line); text-align: center; color: var(--text); }
+  .daypill:active { transform: scale(0.96); }
+  .daypill .dw { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .daypill .dn { font-size: 18px; font-weight: 800; margin-top: 1px; }
+  .daypill.sel { background: var(--accent); border-color: var(--accent); }
+  .daypill.sel .dw { color: rgba(255,255,255,0.85); }
+  .daypill.sel .dn { color: #fff; }
+  .daypill.today:not(.sel) { border-color: var(--accent); }
+  .daypill.today:not(.sel) .dn { color: var(--accent-2); }
+
+  /* ---------- Goal vision map ---------- */
+  .goal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
+  .gnode { aspect-ratio: 1 / 1; border-radius: 16px; border: 1px solid var(--line); background: var(--card);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 6px; color: var(--text); }
+  .gnode:active { transform: scale(0.97); }
+  .gnode .ring { position: relative; width: 50px; height: 50px; border-radius: 50%;
+    background: conic-gradient(var(--rc) calc(var(--p, 0) * 3.6deg), var(--line) 0deg); }
+  .gnode .ring .inner { position: absolute; inset: 5px; border-radius: 50%; background: var(--card);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+  .gnode .gname { font-size: 12px; font-weight: 700; line-height: 1.15; text-align: center; }
+  .gcenter { background: linear-gradient(135deg, var(--accent), #5b3fd1); border-color: var(--accent-2); }
+  .gcenter .gc-title { font-size: 13px; font-weight: 800; line-height: 1.15; text-align: center; color: #fff; letter-spacing: -0.01em; }
+  .gcenter .gc-sub { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.92); }
+
+  /* ---------- Goal items ---------- */
+  .goal-item { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border: 1px solid var(--line);
+    border-radius: 13px; background: var(--card); margin-top: 8px; color: var(--text); width: 100%; text-align: left; }
+  .goal-item:active { transform: scale(0.995); }
+  .goal-item .gbox { width: 25px; height: 25px; border-radius: 8px; border: 2px solid var(--line); flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; font-size: 15px; color: transparent; }
+  .goal-item.done { border-color: var(--rc); background: color-mix(in srgb, var(--rc) 13%, var(--card)); }
+  .goal-item.done .gbox { background: var(--rc); border-color: var(--rc); color: #0b0d12; }
+  .goal-item .grow2 { flex: 1; min-width: 0; }
+  .goal-item .gnm { font-weight: 600; }
+  .goal-item.done .gnm { color: var(--muted); }
+  .goal-item .gnote { font-size: 13px; color: var(--accent-2); margin-top: 2px; }
+  .gnotebtn, .gdelbtn { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card-2); color: var(--muted); font-size: 15px; flex: 0 0 auto; }
+  .gdelbtn { color: var(--danger); }
+
+  /* ---------- Radial area map ---------- */
+  .radial { position: relative; width: 100%; margin: 6px 0 0; }
+  .rnode {
+    position: absolute; border-radius: 50%; border: 1px solid var(--line); background: var(--card);
+    color: var(--text); display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 7px; font-size: 10.5px; font-weight: 600; line-height: 1.12; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  .rnode:active { transform: scale(0.93); }
+  .rnode .rlabel { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .rnode .rcheck { display: none; }
+  .rnode .rdot { position: absolute; bottom: 5px; font-size: 9px; }
+  .rnode.done { background: var(--rc); border-color: var(--rc); color: #0b0d12; }
+  .rnode.done .rcheck { display: block; position: absolute; top: 5px; right: 7px; font-size: 11px; font-weight: 800; }
+  .rcenter { position: absolute; border-radius: 50%; z-index: 1; }
+
+  /* ---------- Trends heatmap ---------- */
+  .heat { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .heatcell { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--line); background: var(--card);
+    display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--faint); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top" id="topbar"></header>
+  <main id="main"></main>
+  <button class="fab" id="fab" hidden>+</button>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Lift Log — single-file workout tracker
+   Data lives in localStorage under STORE_KEY.
+   ============================================================ */
+
+const STORE_KEY = "liftlog.v1";
+
+/* ---------- tiny helpers ---------- */
+const $ = (sel, el = document) => el.querySelector(sel);
+const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const todayISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+
+/* ---------- seed data ---------- */
+function seed() {
+  const cats = [
+    ["Chest", "🫀"], ["Back", "🔙"], ["Shoulders", "🤷"], ["Biceps", "💪"],
+    ["Triceps", "🦾"], ["Quads", "🦵"], ["Hamstrings", "🐎"], ["Glutes", "🍑"],
+    ["Calves", "🦶"], ["Core", "🧱"],
+  ].map(([name, emoji]) => ({ id: uid(), name, emoji }));
+  const byName = (n) => cats.find((c) => c.name === n).id;
+  const ex = [];
+  const add = (cat, names) => names.forEach((name) => ex.push({ id: uid(), name, categoryId: byName(cat) }));
+  add("Chest", ["Barbell Bench Press", "Incline Barbell Bench Press", "Dumbbell Chest Press", "Incline Dumbbell Press", "Dumbbell Chest Fly", "Cable Fly", "Bench-Supported Push-Ups", "Machine Chest Press"]);
+  add("Back", ["Pull-Ups", "Lat Pulldown", "Barbell Row", "Dumbbell Row", "Seated Cable Row", "Deadlift", "T-Bar Row", "Straight-Arm Pulldown"]);
+  add("Shoulders", ["Overhead Press", "Dumbbell Shoulder Press", "Lateral Raise", "Front Raise", "Rear Delt Fly", "Arnold Press", "Face Pull"]);
+  add("Biceps", ["Barbell Curl", "Dumbbell Curl", "Hammer Curl", "Preacher Curl", "Incline Dumbbell Curl", "Cable Curl"]);
+  add("Triceps", ["Tricep Pushdown", "Rope Pushdown", "Overhead Tricep Extension", "Skull Crushers", "Close-Grip Bench Press", "Dips"]);
+  add("Quads", ["Back Squat", "Front Squat", "Leg Press", "Leg Extension", "Hack Squat", "Bulgarian Split Squat", "Walking Lunges"]);
+  add("Hamstrings", ["Romanian Deadlift", "Lying Leg Curl", "Seated Leg Curl", "Stiff-Leg Deadlift", "Good Morning"]);
+  add("Glutes", ["Hip Thrust", "Glute Bridge", "Cable Kickback", "Step-Up"]);
+  add("Calves", ["Standing Calf Raise", "Seated Calf Raise", "Leg Press Calf Raise"]);
+  add("Core", ["Plank", "Hanging Leg Raise", "Cable Crunch", "Russian Twist", "Ab Wheel Rollout"]);
+  const find = (n) => ex.find((e) => e.name === n).id;
+  const routines = [
+    { id: uid(), name: "Push Day", exerciseIds: ["Barbell Bench Press", "Incline Dumbbell Press", "Overhead Press", "Lateral Raise", "Tricep Pushdown", "Overhead Tricep Extension"].map(find) },
+    { id: uid(), name: "Pull Day", exerciseIds: ["Pull-Ups", "Barbell Row", "Lat Pulldown", "Seated Cable Row", "Barbell Curl", "Hammer Curl"].map(find) },
+    { id: uid(), name: "Leg Day", exerciseIds: ["Back Squat", "Romanian Deadlift", "Leg Press", "Leg Extension", "Lying Leg Curl", "Standing Calf Raise"].map(find) },
+  ];
+  return { categories: cats, exercises: ex, routines, logs: [], goals: seedGoals(), goalLogs: {} };
+}
+
+const GOAL_COLORS = ["#34d399", "#a78bfa", "#f472b6", "#60a5fa", "#fb7185", "#22d3ee", "#fbbf24", "#a3e635", "#f97316", "#2dd4bf"];
+function seedGoals() {
+  const defs = [
+    ["Body", "💪", "#34d399", ["Walk 10k steps", "Compound lift", "Yoga", "Stretch", "Gym", "Posture", "Swim", "Pushups"]],
+    ["Spirit", "🕊️", "#a78bfa", ["Pray / Salat", "Meditate", "Memorize surah", "Read / listen Quran"]],
+    ["Appearance", "✨", "#f472b6", ["Red light", "Wash face", "Sunblock", "Derma roll", "Ice bath", "Vitamins", "Whiten", "Face mask", "Scalp massage", "Gua sha", "Rosemary water", "DHT block", "Oils"]],
+    ["Career", "💼", "#60a5fa", ["Network", "New app idea", "Portfolio", "Staff level"]],
+    ["Relationships", "❤️", "#fb7185", ["Parents", "Dating", "Cousins", "Friends", "New people", "Siblings"]],
+    ["UX", "🎨", "#22d3ee", ["Read / watch", "Speculative design", "AI UX", "Design process", "System thinking", "Latest trends", "Up-skill"]],
+    ["Creativity", "🎭", "#fbbf24", ["3D art", "3D modeling", "Drawing", "Piano", "Reading"]],
+    ["Home", "🏠", "#a3e635", ["Daily chores", "Tidy room", "Documentation", "Laundry", "Water plants", "Clean garage", "Change sheets", "Clean bathroom"]],
+  ];
+  return { identity: "Yusuf of my Dreams", areas: defs.map(([name, emoji, color, items]) => ({ id: uid(), name, emoji, color, items: items.map((n) => ({ id: uid(), name: n })) })) };
+}
+
+/* ---------- store ---------- */
+let DB = load();
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) { const s = seed(); localStorage.setItem(STORE_KEY, JSON.stringify(s)); return s; }
+    const d = JSON.parse(raw);
+    d.categories ||= []; d.exercises ||= []; d.routines ||= []; d.logs ||= [];
+    let migrated = false;
+    if (!d.goals || !d.goals.areas) { d.goals = seedGoals(); migrated = true; }
+    if (!d.goalLogs) { d.goalLogs = {}; migrated = true; }
+    if (migrated) localStorage.setItem(STORE_KEY, JSON.stringify(d));
+    return d;
+  } catch (e) { return seed(); }
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+  catch (e) { toast("Storage full — use smaller images or fewer photos"); }
+}
+
+/* ---------- data accessors ---------- */
+const cat = (id) => DB.categories.find((c) => c.id === id);
+const exr = (id) => DB.exercises.find((e) => e.id === id);
+const area = (id) => DB.goals.areas.find((a) => a.id === id);
+const rtn = (id) => DB.routines.find((r) => r.id === id);
+const exInCat = (cid) => DB.exercises.filter((e) => e.categoryId === cid).sort((a, b) => a.name.localeCompare(b.name));
+const logsFor = (eid) => DB.logs.filter((l) => l.exerciseId === eid).sort((a, b) => (b.date + b.ts).localeCompare(a.date + a.ts));
+const lastLog = (eid) => logsFor(eid)[0] || null;
+function pbFor(eid) {
+  let pb = 0; for (const l of DB.logs) if (l.exerciseId === eid) for (const s of l.sets) if (+s.weight > pb) pb = +s.weight; return pb;
+}
+const setVol = (sets) => sets.reduce((a, s) => a + (+s.weight || 0) * (+s.reps || 0), 0);
+
+/* ---------- formatting ---------- */
+function fmtSets(sets) {
+  // collapse identical weight: "155 × 10, 8"
+  if (!sets.length) return "—";
+  const groups = [];
+  for (const s of sets) {
+    const last = groups[groups.length - 1];
+    if (last && +last.w === +s.weight) last.reps.push(s.reps);
+    else groups.push({ w: s.weight, reps: [s.reps] });
+  }
+  return groups.map((g) => `<b>${g.w}</b> × ${g.reps.join(", ")}`).join("  ·  ");
+}
+function relDate(iso) {
+  const t = todayISO();
+  if (iso === t) return "Today";
+  const d1 = new Date(iso), d0 = new Date(t);
+  const diff = Math.round((d0 - d1) / 86400000);
+  if (diff === 1) return "Yesterday";
+  if (diff > 1 && diff < 7) return diff + " days ago";
+  return new Date(iso + "T00:00").toLocaleDateString(undefined, { month: "short", day: "numeric", year: d1.getFullYear() !== d0.getFullYear() ? "numeric" : undefined });
+}
+
+/* ============================================================
+   ROUTER  — view is {name, ...params}
+   ============================================================ */
+let view = { name: "home" };
+let goalDate = todayISO();
+const TABS = [
+  { key: "routines", label: "Routines", ic: "🗓️" },
+  { key: "exercises", label: "Exercises", ic: "🏋️" },
+  { key: "history", label: "History", ic: "📈" },
+];
+const GOAL_TABS = [
+  { key: "goalToday", label: "Today", ic: "✨" },
+  { key: "goalTrends", label: "Trends", ic: "📊" },
+];
+function modeOf(name) {
+  if (name === "home" || name === "launch") return "home";
+  if (name === "goalToday" || name === "goalArea" || name === "goalTrends") return "goal";
+  return "lift";
+}
+function go(v) { view = v; window.scrollTo(0, 0); render(); }
+
+function render() {
+  renderTabs();
+  const m = $("#main");
+  const fab = $("#fab");
+  fab.hidden = true; fab.onclick = null;
+  switch (view.name) {
+    case "home": viewHome(m); break;
+    case "launch": viewLaunch(m); break;
+    case "routines": viewRoutines(m, fab); break;
+    case "session": viewSession(m); break;
+    case "exercises": viewExercises(m, fab); break;
+    case "category": viewCategory(m, fab); break;
+    case "exercise": viewExercise(m); break;
+    case "history": viewHistory(m); break;
+    case "editRoutine": viewEditRoutine(m); break;
+    case "goalToday": viewGoalToday(m); break;
+    case "goalArea": viewGoalArea(m); break;
+    case "goalTrends": viewGoalTrends(m); break;
+    default: viewHome(m);
+  }
+}
+
+function renderTabs() {
+  const nav = $("#tabs");
+  const mode = modeOf(view.name);
+  if (mode === "home") { nav.style.display = "none"; nav.innerHTML = ""; return; }
+  nav.style.display = "";
+  let set, active;
+  if (mode === "goal") {
+    set = GOAL_TABS;
+    active = view.name === "goalTrends" ? "goalTrends" : "goalToday";
+  } else {
+    set = TABS;
+    active = ({ routines: "routines", session: "routines", exercises: "exercises", category: "exercises", exercise: "exercises", history: "history", editRoutine: "routines" })[view.name] || "routines";
+  }
+  nav.innerHTML = set.map((t) =>
+    `<button class="${t.key === active ? "active" : ""}" data-tab="${t.key}">
+       <span class="ic">${t.ic}</span>${t.label}</button>`).join("");
+  nav.querySelectorAll("button").forEach((b) => b.onclick = () => go({ name: b.dataset.tab }));
+}
+
+function setHeader({ title, sub, back, home, action }) {
+  const h = $("#topbar");
+  const left = back ? `<button class="back-btn" id="hback">‹</button>`
+    : home ? `<button class="back-btn" id="hhome">⌂</button>` : "";
+  h.innerHTML = left +
+    `<div class="grow" style="flex:1;min-width:0"><div class="title">${esc(title)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ""}</div>` +
+    (action ? `<button class="head-action" id="haction">${esc(action.label)}</button>` : "");
+  if (back) $("#hback").onclick = back;
+  if (home) $("#hhome").onclick = home;
+  if (action) $("#haction").onclick = action.fn;
+}
+
+/* ============================================================
+   VIEW: Routines (home)
+   ============================================================ */
+function viewRoutines(m, fab) {
+  setHeader({ title: "Routines", sub: "Pick your day & start lifting", home: () => go({ name: "home" }) });
+  let html = `<div class="view">`;
+  if (!DB.routines.length) {
+    html += emptyState("🗓️", "No routines yet", "Tap + to build your first day routine.");
+  } else {
+    html += `<div class="stack">`;
+    for (const r of DB.routines) {
+      const names = r.exerciseIds.map((id) => exr(id)).filter(Boolean);
+      const tags = names.slice(0, 4).map((e) => `<span class="tag">${esc(e.name)}</span>`).join("");
+      const more = names.length > 4 ? `<span class="tag">+${names.length - 4}</span>` : "";
+      html += `<button class="routine-card" data-r="${r.id}">
+        <span class="startpill">Start ›</span>
+        <div class="rname">${esc(r.name)}</div>
+        <div class="rmeta">${names.length} exercise${names.length === 1 ? "" : "s"}</div>
+        <div class="rtags">${tags}${more}</div>
+      </button>`;
+    }
+    html += `</div>`;
+  }
+  html += `<div style="margin-top:18px"><button class="btn ghost" id="newR">＋ New routine</button></div>`;
+  html += `</div>`;
+  m.innerHTML = html;
+  m.querySelectorAll("[data-r]").forEach((b) => b.onclick = () => go({ name: "session", routineId: b.dataset.r }));
+  $("#newR").onclick = () => go({ name: "editRoutine", routineId: null });
+  fab.hidden = false;
+  fab.onclick = () => go({ name: "editRoutine", routineId: null });
+}
+
+/* ============================================================
+   VIEW: Session (run a routine)
+   ============================================================ */
+function viewSession(m) {
+  const r = rtn(view.routineId);
+  if (!r) return go({ name: "routines" });
+  setHeader({
+    title: r.name, sub: "Tap an exercise to log", back: () => go({ name: "routines" }),
+    action: { label: "Edit", fn: () => go({ name: "editRoutine", routineId: r.id }) },
+  });
+  let html = `<div class="view">`;
+  const ids = r.exerciseIds.filter((id) => exr(id));
+  if (!ids.length) {
+    html += emptyState("➕", "Empty routine", "Add exercises to this routine to get started.");
+    html += `<button class="btn primary" id="edit">Add exercises</button>`;
+  } else {
+    const t = todayISO();
+    for (const id of ids) {
+      const e = exr(id);
+      const last = lastLog(id);
+      const doneToday = last && last.date === t;
+      const lastTxt = last
+        ? `Last (${relDate(last.date)}): ${fmtSets(last.sets)}`
+        : `No history yet — set your first numbers.`;
+      html += `<div class="sx">
+        <button class="sxhead" data-ex="${id}" style="width:100%;background:none;border:none;color:inherit;text-align:left">
+          ${e.image ? `<img class="ex-thumb sm" src="${esc(e.image)}" alt="">` : ""}
+          <div class="nm">${esc(e.name)}</div>
+          ${doneToday ? `<div class="done">✓</div>` : `<div class="chev" style="color:var(--faint);font-size:20px">›</div>`}
+        </button>
+        <div class="last">${lastTxt}</div>
+      </div>`;
+    }
+  }
+  html += `</div>`;
+  m.innerHTML = html;
+  if ($("#edit")) $("#edit").onclick = () => go({ name: "editRoutine", routineId: r.id });
+  m.querySelectorAll("[data-ex]").forEach((b) => b.onclick = () => openLogSheet(b.dataset.ex, () => render()));
+}
+
+/* ============================================================
+   VIEW: Exercises (categories)
+   ============================================================ */
+function viewExercises(m, fab) {
+  setHeader({ title: "Exercises", sub: "Browse by muscle group", home: () => go({ name: "home" }) });
+  let html = `<div class="view"><div class="stack">`;
+  for (const c of DB.categories) {
+    const n = exInCat(c.id).length;
+    html += `<button class="row-card" data-c="${c.id}">
+      <span class="glyph">${c.emoji || "🏋️"}</span>
+      <span class="grow"><span class="name">${esc(c.name)}</span><span class="meta">${n} exercise${n === 1 ? "" : "s"}</span></span>
+      <span class="chev">›</span>
+    </button>`;
+  }
+  html += `</div><div style="margin-top:18px" class="btn-row">
+      <button class="btn ghost sm" id="addCat" style="flex:1">＋ Category</button>
+      <button class="btn ghost sm" id="dataBtn" style="flex:1">⚙︎ Backup</button>
+    </div></div>`;
+  m.innerHTML = html;
+  m.querySelectorAll("[data-c]").forEach((b) => b.onclick = () => go({ name: "category", catId: b.dataset.c }));
+  $("#addCat").onclick = addCategory;
+  $("#dataBtn").onclick = openDataSheet;
+  fab.hidden = false;
+  fab.onclick = () => openNewExerciseSheet(null);
+}
+
+/* ============================================================
+   VIEW: Category (exercises within)
+   ============================================================ */
+function viewCategory(m, fab) {
+  const c = cat(view.catId);
+  if (!c) return go({ name: "exercises" });
+  const editing = !!view.edit;
+  const list = exInCat(c.id);
+  setHeader({
+    title: `${c.emoji || ""} ${c.name}`.trim(),
+    sub: editing ? "Tap − to remove exercises" : "Tap to view & log",
+    back: () => go({ name: "exercises" }),
+    action: list.length ? { label: editing ? "Done" : "Edit", fn: () => go({ name: "category", catId: c.id, edit: !editing }) } : null,
+  });
+  let html = `<div class="view">`;
+  if (!list.length) {
+    html += emptyState("🏋️", "No exercises yet", "Tap + to add the ones you like.");
+  } else {
+    html += `<div class="stack">`;
+    for (const e of list) {
+      const last = lastLog(e.id);
+      const meta = last ? `${relDate(last.date)} · ${fmtSetsPlain(last.sets)}` : "No history yet";
+      const thumb = e.image ? `<img class="ex-thumb" src="${esc(e.image)}" alt="">` : "";
+      if (editing) {
+        html += `<div class="row-card">
+          <button class="rm-ex" data-del="${e.id}">−</button>
+          ${thumb}
+          <span class="grow"><span class="name">${esc(e.name)}</span><span class="meta">${esc(meta)}</span></span>
+        </div>`;
+      } else {
+        html += `<button class="row-card" data-ex="${e.id}">
+          ${thumb}
+          <span class="grow"><span class="name">${esc(e.name)}</span><span class="meta">${esc(meta)}</span></span>
+          <span class="chev">›</span></button>`;
+      }
+    }
+    html += `</div>`;
+  }
+  html += `<div style="margin-top:18px" class="btn-row">
+      <button class="btn ghost sm" id="renCat" style="flex:1">Rename group</button>
+      <button class="btn ghost sm" id="delCat" style="flex:1">Delete group</button>
+    </div></div>`;
+  m.innerHTML = html;
+  m.querySelectorAll("[data-ex]").forEach((b) => b.onclick = () => go({ name: "exercise", exId: b.dataset.ex }));
+  m.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
+    const e = exr(b.dataset.del); if (!e) return;
+    const n = logsFor(e.id).length;
+    if (n && !confirm(`Delete "${e.name}" and its ${n} logged session(s)?`)) return;
+    removeExercise(e); toast("Removed");
+    go({ name: "category", catId: c.id, edit: true });
+  });
+  $("#renCat").onclick = () => renameCategory(c);
+  $("#delCat").onclick = () => deleteCategory(c);
+  fab.hidden = false;
+  fab.onclick = () => openNewExerciseSheet(c.id);
+}
+function fmtSetsPlain(sets) {
+  if (!sets.length) return "—";
+  const w = Math.max(...sets.map((s) => +s.weight || 0));
+  return `${sets.length} set${sets.length === 1 ? "" : "s"} · top ${w}`;
+}
+
+/* ============================================================
+   VIEW: Exercise detail
+   ============================================================ */
+function viewExercise(m) {
+  const e = exr(view.exId);
+  if (!e) return go({ name: "exercises" });
+  const c = cat(e.categoryId);
+  setHeader({
+    title: e.name, sub: c ? c.name : "", back: () => history.length && view.from === "cat" ? go({ name: "category", catId: e.categoryId }) : go({ name: "category", catId: e.categoryId }),
+    action: { label: "Edit", fn: () => editExercise(e) },
+  });
+  const logs = logsFor(e.id);
+  const pb = pbFor(e.id);
+  const last = logs[0];
+  const sessions = logs.length;
+  let html = `<div class="view">`;
+  html += e.image
+    ? `<img class="hero-img" src="${esc(e.image)}" alt="${esc(e.name)}">`
+    : `<button class="add-photo" id="addPhoto"><span class="ph">📷</span>Add a photo</button>`;
+  html += `<div class="stat-grid">
+    <div class="stat"><div class="val accent">${pb || "—"}</div><div class="lbl">Best</div></div>
+    <div class="stat"><div class="val">${last ? maxW(last.sets) : "—"}</div><div class="lbl">Last top</div></div>
+    <div class="stat"><div class="val">${sessions}</div><div class="lbl">Sessions</div></div>
+  </div>`;
+  html += `<div style="margin-top:16px"><button class="btn primary" id="logBtn">＋ Log a set</button></div>`;
+  html += `<div class="section-label">History</div>`;
+  if (!logs.length) {
+    html += emptyState("📈", "No sessions logged", "Tap “Log a set” to record your first lift.");
+  } else {
+    html += `<div class="stack">`;
+    for (const l of logs) {
+      const isPB = maxW(l.sets) >= pb && pb > 0;
+      html += `<div class="sess" data-log="${l.id}">
+        <div class="date"><span>${relDate(l.date)} ${isPB ? '<span class="pb-badge">★ PB</span>' : ""}</span>
+          <span class="vol">${setVol(l.sets).toLocaleString()} vol</span></div>
+        <div class="sets">${l.sets.map((s) => `<span class="setchip"><b>${esc(s.weight)}</b> × ${esc(s.reps)}</span>`).join("")}</div>
+        ${l.notes ? `<div class="note">“${esc(l.notes)}”</div>` : ""}
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</div>`;
+  m.innerHTML = html;
+  $("#logBtn").onclick = () => openLogSheet(e.id, () => render());
+  if ($("#addPhoto")) $("#addPhoto").onclick = () => editExercise(e);
+  m.querySelectorAll("[data-log]").forEach((el) => el.onclick = () => editLog(el.dataset.log));
+}
+const maxW = (sets) => sets.length ? Math.max(...sets.map((s) => +s.weight || 0)) : 0;
+
+/* ============================================================
+   VIEW: History
+   ============================================================ */
+function viewHistory(m) {
+  setHeader({ title: "History", sub: "Everything you've logged", home: () => go({ name: "home" }) });
+  let html = `<div class="view">`;
+  if (!DB.logs.length) {
+    html += emptyState("📈", "Nothing logged yet", "Start a routine or log an exercise to see your history here.");
+  } else {
+    const byDate = {};
+    for (const l of DB.logs) (byDate[l.date] ||= []).push(l);
+    const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+    // totals
+    const totalVol = DB.logs.reduce((a, l) => a + setVol(l.sets), 0);
+    html += `<div class="stat-grid">
+      <div class="stat"><div class="val accent">${dates.length}</div><div class="lbl">Days</div></div>
+      <div class="stat"><div class="val">${DB.logs.length}</div><div class="lbl">Entries</div></div>
+      <div class="stat"><div class="val">${Math.round(totalVol / 1000)}k</div><div class="lbl">Volume</div></div>
+    </div>`;
+    for (const d of dates) {
+      const entries = byDate[d].slice().sort((a, b) => b.ts.localeCompare(a.ts));
+      html += `<div class="section-label">${relDate(d)}</div><div class="stack">`;
+      for (const l of entries) {
+        const e = exr(l.exerciseId);
+        if (!e) continue;
+        html += `<div class="sess" data-ex="${l.exerciseId}">
+          <div class="date"><span>${esc(e.name)}</span><span class="vol">${setVol(l.sets).toLocaleString()} vol</span></div>
+          <div class="sets">${l.sets.map((s) => `<span class="setchip"><b>${esc(s.weight)}</b> × ${esc(s.reps)}</span>`).join("")}</div>
+          ${l.notes ? `<div class="note">“${esc(l.notes)}”</div>` : ""}
+        </div>`;
+      }
+      html += `</div>`;
+    }
+  }
+  html += `</div>`;
+  m.innerHTML = html;
+  m.querySelectorAll("[data-ex]").forEach((el) => el.onclick = () => go({ name: "exercise", exId: el.dataset.ex }));
+}
+
+/* ============================================================
+   VIEW: Edit / build routine
+   ============================================================ */
+let draftRoutine = null;
+function viewEditRoutine(m) {
+  const existing = view.routineId ? rtn(view.routineId) : null;
+  if (!draftRoutine || draftRoutine._for !== (view.routineId || "new")) {
+    draftRoutine = existing
+      ? { _for: existing.id, name: existing.name, exerciseIds: existing.exerciseIds.slice() }
+      : { _for: "new", name: "", exerciseIds: [] };
+  }
+  setHeader({
+    title: existing ? "Edit routine" : "New routine",
+    back: () => { draftRoutine = null; existing ? go({ name: "session", routineId: existing.id }) : go({ name: "routines" }); },
+    action: { label: "Save", fn: saveRoutine },
+  });
+  let html = `<div class="view">
+    <label class="field"><span class="l">Routine name</span>
+      <input type="text" id="rname" placeholder="e.g. Monday — Chest" value="${esc(draftRoutine.name)}"></label>
+    <div class="section-label">Exercises (${draftRoutine.exerciseIds.length} selected)</div>`;
+  for (const c of DB.categories) {
+    const list = exInCat(c.id);
+    if (!list.length) continue;
+    html += `<div class="section-label" style="margin:16px 2px 4px;color:var(--muted)">${c.emoji || ""} ${esc(c.name)}</div>`;
+    for (const e of list) {
+      const on = draftRoutine.exerciseIds.includes(e.id);
+      html += `<div class="check-row ${on ? "on" : ""}" data-pick="${e.id}">
+        <div class="box">✓</div><div class="nm">${esc(e.name)}</div></div>`;
+    }
+  }
+  html += `<hr class="div">`;
+  if (existing) html += `<button class="btn danger" id="delR">Delete routine</button>`;
+  html += `</div>`;
+  m.innerHTML = html;
+  $("#rname").oninput = (ev) => draftRoutine.name = ev.target.value;
+  m.querySelectorAll("[data-pick]").forEach((el) => el.onclick = () => {
+    const id = el.dataset.pick;
+    const i = draftRoutine.exerciseIds.indexOf(id);
+    if (i >= 0) draftRoutine.exerciseIds.splice(i, 1); else draftRoutine.exerciseIds.push(id);
+    el.classList.toggle("on");
+    $(".section-label").nextSibling; // noop
+    // update count label
+    const lbl = m.querySelector(".section-label + input") ? null : null;
+    const countLabel = [...m.querySelectorAll(".section-label")].find((x) => x.textContent.startsWith("Exercises"));
+    if (countLabel) countLabel.textContent = `Exercises (${draftRoutine.exerciseIds.length} selected)`;
+  });
+  if ($("#delR")) $("#delR").onclick = () => {
+    if (!confirm(`Delete routine "${existing.name}"?`)) return;
+    DB.routines = DB.routines.filter((r) => r.id !== existing.id); save();
+    draftRoutine = null; toast("Routine deleted"); go({ name: "routines" });
+  };
+}
+function saveRoutine() {
+  const name = (draftRoutine.name || "").trim();
+  if (!name) { toast("Name your routine"); return; }
+  if (!draftRoutine.exerciseIds.length) { toast("Pick at least one exercise"); return; }
+  const existing = view.routineId ? rtn(view.routineId) : null;
+  if (existing) { existing.name = name; existing.exerciseIds = draftRoutine.exerciseIds.slice(); }
+  else DB.routines.push({ id: uid(), name, exerciseIds: draftRoutine.exerciseIds.slice() });
+  save();
+  const id = existing ? existing.id : DB.routines[DB.routines.length - 1].id;
+  draftRoutine = null; toast("Routine saved");
+  go({ name: "session", routineId: id });
+}
+
+/* ============================================================
+   LOG SHEET (the core fast-entry interaction)
+   ============================================================ */
+function openLogSheet(exId, onSaved, editLogId = null) {
+  const e = exr(exId);
+  const editing = editLogId ? DB.logs.find((l) => l.id === editLogId) : null;
+  const last = editing || lastLog(exId);
+  // draft sets: from editing log, else clone last session, else one blank
+  let sets = editing ? editing.sets.map((s) => ({ weight: +s.weight, reps: +s.reps }))
+    : last ? last.sets.map((s) => ({ weight: +s.weight, reps: +s.reps }))
+      : [{ weight: 45, reps: 10 }];
+  let notes = editing ? (editing.notes || "") : "";
+  let date = editing ? editing.date : todayISO();
+  const pb = pbFor(exId);
+
+  const body = document.createElement("div");
+  function draw() {
+    const hint = (!editing && last) ? `<div class="sub">Pre-filled from ${relDate(last.date)}. Adjust & save.</div>` : "";
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:2px">
+        ${e.image ? `<img class="ex-thumb" src="${esc(e.image)}" alt="">` : ""}
+        <h3 style="margin:0;flex:1">${esc(e.name)}</h3>
+      </div>
+      ${hint}
+      ${pb ? `<div class="sub">Best: <b style="color:var(--accent-2)">${pb}</b> · beat it 💪</div>` : ""}
+      <div class="set-head"><span>Weight</span><span>Reps</span><span style="flex:0 0 34px"></span></div>
+      <div id="setList"></div>
+      <button class="btn ghost sm" id="addSet" style="width:100%;margin-top:12px">＋ Add set</button>
+      <label class="field"><span class="l">Date</span><input type="date" id="logDate" value="${date}"></label>
+      <label class="field"><span class="l">Notes (optional)</span>
+        <textarea id="notes" placeholder="How'd it feel? Form cues, RPE…">${esc(notes)}</textarea></label>
+      <div class="btn-row" style="margin-top:18px">
+        ${editing ? `<button class="btn danger" id="delLog">Delete</button>` : ""}
+        <button class="btn primary" id="saveLog">${editing ? "Update" : "Save"} entry</button>
+      </div>`;
+    const list = body.querySelector("#setList");
+    sets.forEach((s, i) => list.appendChild(setRow(s, i)));
+    body.querySelector("#addSet").onclick = () => {
+      const lastS = sets[sets.length - 1] || { weight: 45, reps: 10 };
+      sets.push({ weight: +lastS.weight, reps: +lastS.reps }); draw();
+    };
+    body.querySelector("#logDate").onchange = (ev) => date = ev.target.value;
+    body.querySelector("#notes").oninput = (ev) => notes = ev.target.value;
+    body.querySelector("#saveLog").onclick = doSave;
+    if (editing) body.querySelector("#delLog").onclick = () => {
+      if (!confirm("Delete this entry?")) return;
+      DB.logs = DB.logs.filter((l) => l.id !== editing.id); save();
+      closeSheet(); toast("Entry deleted"); onSaved && onSaved();
+    };
+  }
+  function setRow(s, i) {
+    const row = document.createElement("div");
+    row.className = "set-edit";
+    row.innerHTML = `
+      <div class="idx">${i + 1}</div>
+      <div class="stepper">
+        <button data-act="w-">−</button>
+        <input class="num" type="number" inputmode="decimal" value="${s.weight}" data-f="weight">
+        <span class="unit">lb</span>
+        <button data-act="w+">＋</button>
+      </div>
+      <div class="stepper" style="max-width:130px">
+        <button data-act="r-">−</button>
+        <input class="num" type="number" inputmode="numeric" value="${s.reps}" data-f="reps">
+        <button data-act="r+">＋</button>
+      </div>
+      <button class="rm" title="Remove set">×</button>`;
+    const wIn = row.querySelector('[data-f="weight"]'), rIn = row.querySelector('[data-f="reps"]');
+    wIn.oninput = () => s.weight = wIn.value === "" ? "" : +wIn.value;
+    rIn.oninput = () => s.reps = rIn.value === "" ? "" : +rIn.value;
+    row.querySelector('[data-act="w-"]').onclick = () => { s.weight = Math.max(0, (+s.weight || 0) - 5); wIn.value = s.weight; };
+    row.querySelector('[data-act="w+"]').onclick = () => { s.weight = (+s.weight || 0) + 5; wIn.value = s.weight; };
+    row.querySelector('[data-act="r-"]').onclick = () => { s.reps = Math.max(0, (+s.reps || 0) - 1); rIn.value = s.reps; };
+    row.querySelector('[data-act="r+"]').onclick = () => { s.reps = (+s.reps || 0) + 1; rIn.value = s.reps; };
+    row.querySelector(".rm").onclick = () => { sets.splice(i, 1); if (!sets.length) sets.push({ weight: 0, reps: 0 }); draw(); };
+    return row;
+  }
+  function doSave() {
+    const clean = sets.map((s) => ({ weight: +s.weight || 0, reps: +s.reps || 0 })).filter((s) => s.reps > 0 || s.weight > 0);
+    if (!clean.length) { toast("Enter at least one set"); return; }
+    if (editing) { editing.sets = clean; editing.notes = notes.trim(); editing.date = date; }
+    else DB.logs.push({ id: uid(), exerciseId: exId, date, ts: new Date().toISOString().slice(11, 23), sets: clean, notes: notes.trim() });
+    save(); closeSheet();
+    const beat = maxW(clean) > pb && pb > 0;
+    toast(beat ? "🎉 New personal best!" : "Logged 💪");
+    onSaved && onSaved();
+  }
+  openSheet(body); draw();
+}
+function editLog(logId) {
+  const l = DB.logs.find((x) => x.id === logId);
+  if (!l) return;
+  openLogSheet(l.exerciseId, () => render(), logId);
+}
+
+/* ============================================================
+   Exercise & category management
+   ============================================================ */
+/* ---------- image picker (shared by new/edit exercise) ---------- */
+function fileToDataURL(file, maxDim, cb) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      const scale = Math.min(1, maxDim / Math.max(w, h));
+      w = Math.round(w * scale); h = Math.round(h * scale);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      try { cb(c.toDataURL("image/jpeg", 0.82)); }
+      catch (e) { cb(reader.result); } // fallback (e.g. cross-origin/odd format)
+    };
+    img.onerror = () => toast("Couldn't read that image");
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function imagePickerMarkup(image) {
+  return `<label class="field"><span class="l">Image (optional)</span></label>
+    <img class="img-preview" id="imgPrev" alt="" style="${image ? "" : "display:none"}" src="${image ? esc(image) : ""}">
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn sm" id="imgUpload" style="flex:1">📷 Upload</button>
+      <button class="btn sm" id="imgUrlBtn" style="flex:1">🔗 URL</button>
+      <button class="btn sm danger" id="imgRemove" style="flex:0 0 auto;${image ? "" : "display:none"}">Remove</button>
+    </div>
+    <input type="file" id="imgFile" accept="image/*" hidden>`;
+}
+function wireImagePicker(scope, state) {
+  const prev = scope.querySelector("#imgPrev");
+  const removeBtn = scope.querySelector("#imgRemove");
+  const fileInput = scope.querySelector("#imgFile");
+  const show = () => {
+    if (state.image) { prev.src = state.image; prev.style.display = ""; removeBtn.style.display = ""; }
+    else { prev.style.display = "none"; removeBtn.style.display = "none"; }
+  };
+  scope.querySelector("#imgUpload").onclick = () => fileInput.click();
+  fileInput.onchange = () => {
+    const f = fileInput.files[0]; if (!f) return;
+    fileToDataURL(f, 700, (url) => { state.image = url; show(); });
+  };
+  scope.querySelector("#imgUrlBtn").onclick = () => {
+    const url = prompt("Paste an image URL:", state.image && state.image.startsWith("http") ? state.image : "https://");
+    if (url && /^https?:\/\//i.test(url.trim())) { state.image = url.trim(); show(); }
+    else if (url) toast("Enter a valid http(s) URL");
+  };
+  removeBtn.onclick = () => { state.image = null; show(); };
+}
+
+function openNewExerciseSheet(presetCatId) {
+  const body = document.createElement("div");
+  let name = "", catId = presetCatId || DB.categories[0]?.id;
+  const state = { image: null };
+  body.innerHTML = `
+    <h3>New exercise</h3>
+    <label class="field"><span class="l">Name</span>
+      <input type="text" id="exname" placeholder="e.g. Incline Cable Fly" autofocus></label>
+    <label class="field"><span class="l">Muscle group</span>
+      <select id="excat">${DB.categories.map((c) => `<option value="${c.id}" ${c.id === catId ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+    ${imagePickerMarkup(null)}
+    <button class="btn primary" id="saveEx" style="margin-top:18px">Add exercise</button>`;
+  body.querySelector("#exname").oninput = (e) => name = e.target.value;
+  body.querySelector("#excat").onchange = (e) => catId = e.target.value;
+  wireImagePicker(body, state);
+  body.querySelector("#saveEx").onclick = () => {
+    if (!name.trim()) { toast("Enter a name"); return; }
+    const ex = { id: uid(), name: name.trim(), categoryId: catId, image: state.image || null };
+    DB.exercises.push(ex); save(); closeSheet(); toast("Exercise added");
+    go({ name: "exercise", exId: ex.id });
+  };
+  openSheet(body);
+  setTimeout(() => body.querySelector("#exname").focus(), 50);
+}
+function editExercise(e) {
+  const body = document.createElement("div");
+  let name = e.name, catId = e.categoryId;
+  const state = { image: e.image || null };
+  body.innerHTML = `
+    <h3>Edit exercise</h3>
+    <label class="field"><span class="l">Name</span><input type="text" id="exname" value="${esc(e.name)}"></label>
+    <label class="field"><span class="l">Muscle group</span>
+      <select id="excat">${DB.categories.map((c) => `<option value="${c.id}" ${c.id === catId ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+    ${imagePickerMarkup(state.image)}
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn danger" id="delEx">Delete</button>
+      <button class="btn primary" id="saveEx">Save</button></div>
+    <p class="muted center" style="font-size:12px;margin-top:12px">Deleting also removes this exercise's logs.</p>`;
+  body.querySelector("#exname").oninput = (ev) => name = ev.target.value;
+  body.querySelector("#excat").onchange = (ev) => catId = ev.target.value;
+  wireImagePicker(body, state);
+  body.querySelector("#saveEx").onclick = () => {
+    if (!name.trim()) { toast("Enter a name"); return; }
+    e.name = name.trim(); e.categoryId = catId; e.image = state.image || null; save(); closeSheet(); toast("Saved"); render();
+  };
+  body.querySelector("#delEx").onclick = () => {
+    if (!confirm(`Delete "${e.name}" and its ${logsFor(e.id).length} log(s)?`)) return;
+    const catId = e.categoryId;
+    removeExercise(e); closeSheet(); toast("Deleted"); go({ name: "category", catId });
+  };
+  openSheet(body);
+}
+function addCategory() {
+  const body = document.createElement("div");
+  let name = "", emoji = "🏋️";
+  body.innerHTML = `
+    <h3>New category</h3>
+    <label class="field"><span class="l">Name</span><input type="text" id="cname" placeholder="e.g. Forearms"></label>
+    <label class="field"><span class="l">Emoji (optional)</span><input type="text" id="cemoji" value="🏋️" maxlength="4"></label>
+    <button class="btn primary" id="saveC" style="margin-top:18px">Add category</button>`;
+  body.querySelector("#cname").oninput = (e) => name = e.target.value;
+  body.querySelector("#cemoji").oninput = (e) => emoji = e.target.value;
+  body.querySelector("#saveC").onclick = () => {
+    if (!name.trim()) { toast("Enter a name"); return; }
+    DB.categories.push({ id: uid(), name: name.trim(), emoji: emoji.trim() || "🏋️" }); save();
+    closeSheet(); toast("Category added"); render();
+  };
+  openSheet(body);
+}
+function renameCategory(c) {
+  const body = document.createElement("div");
+  let name = c.name, emoji = c.emoji || "🏋️";
+  body.innerHTML = `
+    <h3>Edit category</h3>
+    <label class="field"><span class="l">Name</span><input type="text" id="cname" value="${esc(c.name)}"></label>
+    <label class="field"><span class="l">Emoji</span><input type="text" id="cemoji" value="${esc(emoji)}" maxlength="4"></label>
+    <button class="btn primary" id="saveC" style="margin-top:18px">Save</button>`;
+  body.querySelector("#cname").oninput = (e) => name = e.target.value;
+  body.querySelector("#cemoji").oninput = (e) => emoji = e.target.value;
+  body.querySelector("#saveC").onclick = () => {
+    c.name = name.trim() || c.name; c.emoji = emoji.trim() || "🏋️"; save(); closeSheet(); render();
+  };
+  openSheet(body);
+}
+function removeExercise(e) {
+  DB.exercises = DB.exercises.filter((x) => x.id !== e.id);
+  DB.logs = DB.logs.filter((l) => l.exerciseId !== e.id);
+  DB.routines.forEach((r) => r.exerciseIds = r.exerciseIds.filter((id) => id !== e.id));
+  save();
+}
+function deleteCategory(c) {
+  const n = exInCat(c.id).length;
+  if (!confirm(`Delete "${c.name}"${n ? ` and its ${n} exercise(s) + their logs` : ""}?`)) return;
+  const exIds = exInCat(c.id).map((e) => e.id);
+  DB.exercises = DB.exercises.filter((e) => e.categoryId !== c.id);
+  DB.logs = DB.logs.filter((l) => !exIds.includes(l.exerciseId));
+  DB.routines.forEach((r) => r.exerciseIds = r.exerciseIds.filter((id) => !exIds.includes(id)));
+  DB.categories = DB.categories.filter((x) => x.id !== c.id);
+  save(); toast("Category deleted"); go({ name: "exercises" });
+}
+
+/* ============================================================
+   Data backup / restore
+   ============================================================ */
+function openDataSheet() {
+  const body = document.createElement("div");
+  body.innerHTML = `
+    <h3>Backup & data</h3>
+    <div class="sub">Your data is stored only in this browser. Export a file to keep a backup or move to another device.</div>
+    <div class="stack" style="margin-top:14px">
+      <button class="btn" id="exp">⬇︎ Export backup (.json)</button>
+      <button class="btn" id="imp">⬆︎ Import backup</button>
+      <button class="btn danger" id="reset">Reset all data</button>
+    </div>
+    <input type="file" id="file" accept="application/json,.json" hidden>
+    <p class="muted center" style="font-size:12px;margin-top:14px">${DB.exercises.length} exercises · ${DB.routines.length} routines · ${DB.logs.length} logged entries</p>`;
+  body.querySelector("#exp").onclick = exportData;
+  body.querySelector("#imp").onclick = () => body.querySelector("#file").click();
+  body.querySelector("#file").onchange = (e) => importData(e.target.files[0]);
+  body.querySelector("#reset").onclick = () => {
+    if (!confirm("Erase ALL data and restore the starter set? This cannot be undone.")) return;
+    localStorage.removeItem(STORE_KEY); DB = load(); closeSheet(); toast("Reset complete"); go({ name: "routines" });
+  };
+  openSheet(body);
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `liftlog-backup-${todayISO()}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  toast("Backup downloaded");
+}
+function importData(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d.exercises || !d.categories) throw 0;
+      d.routines ||= []; d.logs ||= [];
+      DB = d; save(); closeSheet(); toast("Backup restored"); go({ name: "routines" });
+    } catch (e) { toast("Couldn't read that file"); }
+  };
+  r.readAsText(file);
+}
+
+/* ============================================================
+   Sheet & toast primitives
+   ============================================================ */
+function openSheet(contentEl) {
+  closeSheet();
+  const bg = document.createElement("div");
+  bg.className = "sheet-bg"; bg.id = "sheetBg";
+  const sheet = document.createElement("div");
+  sheet.className = "sheet";
+  sheet.innerHTML = `<div class="grip"></div>`;
+  sheet.appendChild(contentEl);
+  bg.appendChild(sheet);
+  bg.onclick = (e) => { if (e.target === bg) closeSheet(); };
+  document.body.appendChild(bg);
+}
+function closeSheet() { const s = $("#sheetBg"); if (s) s.remove(); }
+
+let toastT = null;
+function toast(msg) {
+  const old = $("#toast"); if (old) old.remove();
+  const t = document.createElement("div");
+  t.className = "toast"; t.id = "toast"; t.textContent = msg;
+  document.body.appendChild(t);
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.remove(), 1900);
+}
+
+function emptyState(big, title, msg) {
+  return `<div class="empty"><div class="big">${big}</div><div style="font-weight:700;font-size:17px">${esc(title)}</div><div class="msg">${esc(msg)}</div></div>`;
+}
+
+/* ============================================================
+   GOAL LOG
+   ============================================================ */
+function isoOf(d) { return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function lastNDates(n) {
+  const out = [], base = new Date();
+  for (let i = n - 1; i >= 0; i--) { const d = new Date(base); d.setDate(base.getDate() - i); out.push(isoOf(d)); }
+  return out;
+}
+function goalDayMap(date) { return DB.goalLogs[date] || (DB.goalLogs[date] = {}); }
+function isDone(date, itemId) { const d = DB.goalLogs[date]; return !!(d && d[itemId] && d[itemId].done); }
+function getGoalNote(date, itemId) { const d = DB.goalLogs[date]; return d && d[itemId] ? (d[itemId].note || "") : ""; }
+function toggleGoal(date, itemId) {
+  const m = goalDayMap(date); const cur = m[itemId] || { done: false, note: "" };
+  cur.done = !cur.done; m[itemId] = cur;
+  if (!cur.done && !cur.note) delete m[itemId];
+  save();
+}
+function setGoalNote(date, itemId, note) {
+  const m = goalDayMap(date); const cur = m[itemId] || { done: false, note: "" };
+  cur.note = note; m[itemId] = cur;
+  if (!cur.done && !cur.note) delete m[itemId];
+  save();
+}
+function areaProgress(a, date) {
+  let done = 0; for (const it of a.items) if (isDone(date, it.id)) done++;
+  const total = a.items.length;
+  return { done, total, pct: total ? Math.round(done / total * 100) : 0 };
+}
+function overallProgress(date) {
+  let done = 0, total = 0;
+  for (const a of DB.goals.areas) { total += a.items.length; for (const it of a.items) if (isDone(date, it.id)) done++; }
+  return { done, total, pct: total ? Math.round(done / total * 100) : 0 };
+}
+
+function renderDateStrip(scope) {
+  const el = scope.querySelector("#dstrip"); if (!el) return;
+  const days = lastNDates(21), t = todayISO();
+  el.innerHTML = days.map((iso) => {
+    const d = new Date(iso + "T00:00");
+    const dw = d.toLocaleDateString(undefined, { weekday: "short" });
+    const cls = (iso === goalDate ? "sel " : "") + (iso === t ? "today" : "");
+    return `<button class="daypill ${cls}" data-d="${iso}"><div class="dw">${dw}</div><div class="dn">${d.getDate()}</div></button>`;
+  }).join("");
+  el.querySelectorAll("[data-d]").forEach((b) => b.onclick = () => { goalDate = b.dataset.d; render(); });
+  const sel = el.querySelector(".daypill.sel");
+  if (sel) el.scrollLeft = sel.offsetLeft - el.clientWidth / 2 + sel.clientWidth / 2;
+}
+
+/* ---------- Launcher ---------- */
+function viewHome(m) {
+  setHeader({ title: "Yusuf's Trackers", sub: "Build the dream" });
+  const ov = overallProgress(todayISO());
+  m.innerHTML = `<div class="view"><div class="launch">
+    <button class="launch-card lift" data-mode="lift">
+      <div class="lc-emoji">🏋️</div>
+      <div class="lc-title">Lift Log</div>
+      <div class="lc-sub">Routines, lifts & personal bests</div>
+    </button>
+    <button class="launch-card goal" data-mode="goal">
+      <div class="lc-emoji">✨</div>
+      <div class="lc-title">Goal Log</div>
+      <div class="lc-sub">Daily habits for the Yusuf of your dreams</div>
+      <div class="lc-prog">Today: ${ov.done}/${ov.total} done${ov.total ? ` · ${ov.pct}%` : ""}</div>
+    </button>
+    <button class="launch-card plan" data-mode="launch">
+      <div class="lc-emoji">🚀</div>
+      <div class="lc-title">Launch Strategy</div>
+      <div class="lc-sub">Get this on the web, your phone & your watch</div>
+    </button>
+  </div></div>`;
+  m.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => {
+    if (b.dataset.mode === "lift") go({ name: "routines" });
+    else if (b.dataset.mode === "launch") go({ name: "launch" });
+    else { goalDate = todayISO(); go({ name: "goalToday" }); }
+  });
+}
+
+/* ---------- Launch strategy ---------- */
+function viewLaunch(m) {
+  setHeader({ title: "Launch Strategy", sub: "From file → phone → wrist", back: () => go({ name: "home" }) });
+  m.innerHTML = `<div class="view"><div class="stack">
+
+    <div class="card plan-card" style="border-color:var(--accent)">
+      <h4>The plan, in order 🎯</h4>
+      <div class="pdesc">Two quick wins now, one bigger project for later:</div>
+      <ol class="steps">
+        <li><b>Host it on GitHub Pages</b> — real URL, ~10 min, free.</li>
+        <li><b>Install it to your iPhone</b> as an app (works offline at the gym).</li>
+        <li><b>Apple Watch</b> — a separate native app; the big one. Details below.</li>
+      </ol>
+    </div>
+
+    <div class="section-label">1 · Live on the web</div>
+    <div class="card plan-card">
+      <h4>🌐 GitHub Pages</h4>
+      <div class="lbadges"><span class="lbadge easy">Easy</span><span class="lbadge">Free</span><span class="lbadge">~10 min</span></div>
+      <ol class="steps">
+        <li>Make a free <span class="pcode">github.com</span> account.</li>
+        <li>Create a new <b>public</b> repo, e.g. <span class="pcode">yusuf-trackers</span>.</li>
+        <li>Upload <span class="pcode">index.html</span> (drag-and-drop in the browser works).</li>
+        <li>Repo → <b>Settings → Pages</b> → Source: <b>main / (root)</b> → Save.</li>
+        <li>Wait ~1 min → open <span class="pcode">you.github.io/yusuf-trackers</span>.</li>
+      </ol>
+      <div class="pcallout">The exact <b>git push</b> commands are in <b>README.md</b> in your project folder.</div>
+    </div>
+
+    <div class="section-label">2 · Make it an app (iPhone & Android)</div>
+    <div class="card plan-card">
+      <h4>📱 Add to Home Screen (PWA)</h4>
+      <div class="lbadges"><span class="lbadge easy">Easy</span><span class="lbadge">Free</span></div>
+      <div class="pdesc" style="margin-top:8px">This is a web app, so the fastest “app” needs no store at all:</div>
+      <ol class="steps">
+        <li><b>iPhone (Safari):</b> open your Pages URL → <b>Share → Add to Home Screen</b>. Opens full-screen with an icon.</li>
+        <li><b>Android (Chrome):</b> menu → <b>Install app</b> / Add to Home screen.</li>
+      </ol>
+      <div class="pcallout">✅ <b>Already set up.</b> This app now ships with an icon, a web manifest, and an offline service worker — so once it’s on GitHub Pages (step 1), Add to Home Screen gives you a real, full-screen, offline app. <i>(The offline part activates only over https — i.e. on Pages, not when opened as a local file.)</i></div>
+    </div>
+
+    <div class="section-label">3 · App Store / Play Store</div>
+    <div class="card plan-card">
+      <h4>🏬 Public store listing</h4>
+      <div class="lbadges"><span class="lbadge hard">Hard</span><span class="lbadge hard">$99/yr Apple · $25 Google</span></div>
+      <div class="pdesc" style="margin-top:8px">Only worth it if you want a public, searchable listing. You’d wrap the web app with a tool like <b>PWABuilder</b> or <b>Capacitor</b> and submit it for review.</div>
+      <div class="pcallout"><b>My take:</b> skip this. For personal use the home-screen app in step 2 is equivalent and free.</div>
+    </div>
+
+    <div class="section-label">4 · Apple Watch</div>
+    <div class="card plan-card">
+      <h4>⌚ Watch app (your gym goal)</h4>
+      <div class="lbadges"><span class="lbadge hard">Hard</span><span class="lbadge hard">Native · separate project</span></div>
+      <div class="pdesc" style="margin-top:8px"><b>Honest reality:</b> the Apple Watch <b>can’t</b> run this web app — watchOS has no browser and no PWA support. A watch app must be built natively in <b>Swift / SwiftUI</b> with <b>Xcode</b>, and installing it on your own watch needs an Apple Developer account ($99/yr) or free 7-day Xcode sideloads. That’s a second codebase from scratch.</div>
+      <div class="pdesc" style="margin-top:10px"><b>Two paths for the gym:</b></div>
+      <ol class="steps">
+        <li><b>Best wrist UX:</b> build a native watchOS Lift Log (browse → pick → log sets, big tap targets). I can scaffold a SwiftUI starter when you’re ready.</li>
+        <li><b>Zero work now:</b> use the iPhone home-screen app at the gym — already offline and one-handed.</li>
+      </ol>
+      <div class="pcallout"><b>My take:</b> ship steps 1–2 today; make the watch app a focused next project once the design here feels right.</div>
+    </div>
+
+  </div></div>`;
+}
+
+/* ---------- Goal: vision map (Today) ---------- */
+function viewGoalToday(m) {
+  setHeader({
+    title: "Goal Log", sub: DB.goals.identity,
+    home: () => go({ name: "home" }),
+    action: { label: "＋ Area", fn: () => openAreaSheet(null) },
+  });
+  const ov = overallProgress(goalDate);
+  const cells = DB.goals.areas.map((a) => {
+    const p = areaProgress(a, goalDate);
+    return `<button class="gnode" data-area="${a.id}" style="--rc:${a.color}">
+      <div class="ring" style="--p:${p.pct}"><div class="inner">${p.total ? `${p.done}/${p.total}` : "—"}</div></div>
+      <div class="gname">${a.emoji || ""} ${esc(a.name)}</div>
+    </button>`;
+  });
+  const center = `<button class="gnode gcenter" data-center="1">
+      <div class="gc-title">${esc(DB.goals.identity)}</div>
+      <div class="gc-sub">${ov.done}/${ov.total}</div>
+    </button>`;
+  cells.splice(Math.floor(DB.goals.areas.length / 2), 0, center);
+  m.innerHTML = `<div class="view">
+    <div class="datestrip" id="dstrip"></div>
+    <div class="goal-grid">${cells.join("")}</div>
+    <p class="muted center" style="font-size:12px;margin-top:16px">${relDate(goalDate)} · ${ov.total ? ov.pct + "% complete" : "add items to get started"}</p>
+  </div>`;
+  renderDateStrip(m);
+  m.querySelectorAll("[data-area]").forEach((b) => b.onclick = () => go({ name: "goalArea", areaId: b.dataset.area }));
+  const c = m.querySelector("[data-center]"); if (c) c.onclick = () => go({ name: "goalTrends" });
+}
+
+/* ---------- Goal: area as a mini vision-map ---------- */
+function viewGoalArea(m) {
+  const a = area(view.areaId);
+  if (!a) return go({ name: "goalToday" });
+  const editing = !!view.edit;
+  const p = areaProgress(a, goalDate);
+  setHeader({
+    title: `${a.emoji || ""} ${a.name}`.trim(), sub: relDate(goalDate),
+    back: () => go({ name: "goalToday" }),
+    action: { label: editing ? "Done" : "Edit", fn: () => go({ name: "goalArea", areaId: a.id, edit: !editing }) },
+  });
+  let html = `<div class="view"><div class="datestrip" id="dstrip"></div>`;
+  if (editing) {
+    if (!a.items.length) html += emptyState("✨", "No items yet", "Add your daily actions below.");
+    for (const it of a.items) {
+      html += `<div class="goal-item" style="--rc:${a.color}">
+        <button class="gdelbtn" data-del="${it.id}">−</button>
+        <div class="grow2"><div class="gnm">${esc(it.name)}</div></div>
+      </div>`;
+    }
+    html += `<button class="btn ghost" id="addItem" style="margin-top:12px">＋ Add item</button>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn ghost sm" id="renA" style="flex:1">Rename area</button>
+        <button class="btn ghost sm" id="delA" style="flex:1">Delete area</button>
+      </div>`;
+  } else if (!a.items.length) {
+    html += emptyState("✨", "No items yet", "Tap Edit to add daily actions.");
+  } else {
+    html += `<div class="radial" id="stage">
+      <div class="gnode gcenter rcenter" id="rcenter">
+        <div class="gc-title">${esc(a.emoji || "")} ${esc(a.name)}</div>
+        <div class="gc-sub">${p.done}/${p.total}</div>
+      </div>
+      ${a.items.map((it) => {
+        const done = isDone(goalDate, it.id), note = getGoalNote(goalDate, it.id);
+        return `<button class="rnode ${done ? "done" : ""}" data-item="${it.id}" style="--rc:${a.color}" title="${esc(it.name)}${note ? " — " + esc(note) : ""}">
+          <span class="rlabel">${esc(it.name)}</span>
+          <span class="rcheck">✓</span>${note ? `<span class="rdot">📝</span>` : ""}
+        </button>`;
+      }).join("")}
+    </div>
+    <p class="muted center" style="font-size:12px;margin-top:14px">${p.pct}% complete · tap a circle to check it · long-press to add a note</p>`;
+  }
+  html += `</div>`;
+  m.innerHTML = html;
+  renderDateStrip(m);
+  if (editing) {
+    m.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
+      a.items = a.items.filter((x) => x.id !== b.dataset.del); save(); render();
+    });
+    if ($("#addItem")) $("#addItem").onclick = () => {
+      const n = prompt("New daily item:");
+      if (n && n.trim()) { a.items.push({ id: uid(), name: n.trim() }); save(); render(); }
+    };
+    if ($("#renA")) $("#renA").onclick = () => openAreaSheet(a);
+    if ($("#delA")) $("#delA").onclick = () => {
+      if (!confirm(`Delete area "${a.name}" and its items?`)) return;
+      DB.goals.areas = DB.goals.areas.filter((x) => x.id !== a.id); save(); go({ name: "goalToday" });
+    };
+  } else {
+    const stage = m.querySelector("#stage");
+    if (stage) {
+      layoutRadial(stage);
+      stage.querySelectorAll(".rnode").forEach((el) => {
+        el.onclick = () => { if (el._lp) { el._lp = false; return; } toggleGoal(goalDate, el.dataset.item); render(); };
+        attachLongPress(el, () => { el._lp = true; editGoalNote(el.dataset.item); });
+      });
+    }
+  }
+}
+function editGoalNote(itemId) {
+  const v = prompt("Note or value (e.g. 12k steps):", getGoalNote(goalDate, itemId));
+  if (v !== null) { setGoalNote(goalDate, itemId, v.trim()); render(); }
+}
+function attachLongPress(el, fn) {
+  let t = null;
+  const start = () => { t = setTimeout(() => { t = null; fn(); }, 500); };
+  const cancel = () => { if (t) { clearTimeout(t); t = null; } };
+  el.addEventListener("touchstart", start, { passive: true });
+  el.addEventListener("touchmove", cancel, { passive: true });
+  el.addEventListener("touchend", cancel);
+  el.addEventListener("contextmenu", (e) => { e.preventDefault(); fn(); });
+}
+function layoutRadial(stage) {
+  const nodes = [...stage.querySelectorAll(".rnode")];
+  const n = nodes.length;
+  const W = stage.clientWidth || 360;
+  const node = n > 12 ? 58 : n > 9 ? 64 : n > 6 ? 72 : 80;
+  const half = node / 2;
+  const rOuter = Math.min(W * 0.46, W / 2 - half - 4);
+  const rInner = rOuter * 0.55;
+  const cx = W / 2, cy = rOuter + half + 4;
+  let inner = [], outer = nodes;
+  if (n > 7) { const k = Math.floor(n / 2); inner = nodes.slice(0, k); outer = nodes.slice(k); }
+  const place = (arr, r, offset) => {
+    const m = arr.length;
+    arr.forEach((el, i) => {
+      const ang = -Math.PI / 2 + (i / m) * 2 * Math.PI + offset;
+      el.style.width = el.style.height = node + "px";
+      el.style.left = (cx + r * Math.cos(ang) - half) + "px";
+      el.style.top = (cy + r * Math.sin(ang) - half) + "px";
+    });
+  };
+  place(outer, rOuter, 0);
+  if (inner.length) place(inner, rInner, Math.PI / inner.length);
+  const cnode = Math.max(82, Math.min(rInner * 1.15, 98));
+  const cEl = stage.querySelector("#rcenter");
+  cEl.style.width = cEl.style.height = cnode + "px";
+  cEl.style.left = (cx - cnode / 2) + "px";
+  cEl.style.top = (cy - cnode / 2) + "px";
+  stage.style.height = (cy + rOuter + half + 6) + "px";
+}
+
+function openAreaSheet(existing) {
+  const body = document.createElement("div");
+  let name = existing ? existing.name : "", emoji = existing ? (existing.emoji || "⭐") : "⭐";
+  body.innerHTML = `<h3>${existing ? "Edit area" : "New area"}</h3>
+    <label class="field"><span class="l">Name</span><input type="text" id="aname" value="${existing ? esc(existing.name) : ""}" placeholder="e.g. Finances"></label>
+    <label class="field"><span class="l">Emoji</span><input type="text" id="aemoji" value="${esc(emoji)}" maxlength="4"></label>
+    <button class="btn primary" id="saveA" style="margin-top:18px">${existing ? "Save" : "Add area"}</button>`;
+  body.querySelector("#aname").oninput = (e) => name = e.target.value;
+  body.querySelector("#aemoji").oninput = (e) => emoji = e.target.value;
+  body.querySelector("#saveA").onclick = () => {
+    if (!name.trim()) { toast("Enter a name"); return; }
+    if (existing) { existing.name = name.trim(); existing.emoji = emoji.trim() || "⭐"; }
+    else {
+      const color = GOAL_COLORS[DB.goals.areas.length % GOAL_COLORS.length];
+      DB.goals.areas.push({ id: uid(), name: name.trim(), emoji: emoji.trim() || "⭐", color, items: [] });
+    }
+    save(); closeSheet(); render();
+  };
+  openSheet(body);
+}
+
+/* ---------- Goal: trends ---------- */
+function viewGoalTrends(m) {
+  setHeader({ title: "Trends", sub: DB.goals.identity, home: () => go({ name: "home" }) });
+  const t = todayISO(), ov = overallProgress(t);
+  let streak = 0;
+  for (let i = 0; i < 366; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    if (overallProgress(isoOf(d)).done > 0) streak++; else break;
+  }
+  const heat = lastNDates(14).map((iso) => {
+    const p = overallProgress(iso), d = new Date(iso + "T00:00");
+    const op = p.total ? p.done / p.total : 0;
+    const bg = p.done ? `background:color-mix(in srgb, var(--accent) ${Math.round(20 + op * 80)}%, var(--card));border-color:transparent;color:#fff;` : "";
+    return `<div class="heatcell" style="${bg}">${d.getDate()}</div>`;
+  }).join("");
+  let html = `<div class="view">
+    <div class="stat-grid">
+      <div class="stat"><div class="val accent">${ov.total ? ov.pct + "%" : "—"}</div><div class="lbl">Today</div></div>
+      <div class="stat"><div class="val">${streak}🔥</div><div class="lbl">Day streak</div></div>
+      <div class="stat"><div class="val">${ov.done}</div><div class="lbl">Done today</div></div>
+    </div>
+    <div class="section-label">Last 14 days</div>
+    <div class="heat">${heat}</div>
+    <div class="section-label">Today by area</div><div class="stack">`;
+  for (const a of DB.goals.areas) {
+    const p = areaProgress(a, t);
+    html += `<button class="row-card" data-area="${a.id}">
+      <span class="ex-thumb" style="background:transparent;border-color:transparent">${a.emoji || ""}</span>
+      <span class="grow"><span class="name">${esc(a.name)}</span><span class="meta">${p.total ? `${p.done}/${p.total} · ${p.pct}%` : "no items"}</span></span>
+      <span class="chev">›</span></button>`;
+  }
+  html += `</div></div>`;
+  m.innerHTML = html;
+  m.querySelectorAll("[data-area]").forEach((b) => b.onclick = () => { goalDate = t; go({ name: "goalArea", areaId: b.dataset.area }); });
+}
+
+/* ---------- boot ---------- */
+window.addEventListener("resize", () => { const s = document.getElementById("stage"); if (s) layoutRadial(s); });
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+render();
+</script>
+</body>
+</html>
