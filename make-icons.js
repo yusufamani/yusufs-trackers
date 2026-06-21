@@ -34,19 +34,14 @@ function png(size, rgba) {
 const lerp = (a, b, t) => a + (b - a) * t;
 const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 
-function inDumbbell(x, y) { // coords in 0..512 space
-  const rrect = (x0, y0, x1, y1, r) => {
-    if (x < x0 || x > x1 || y < y0 || y > y1) return false;
-    const cxl = x0 + r, cxr = x1 - r, cyt = y0 + r, cyb = y1 - r;
-    let dx = 0, dy = 0;
-    if (x < cxl) dx = cxl - x; else if (x > cxr) dx = x - cxr;
-    if (y < cyt) dy = cyt - y; else if (y > cyb) dy = y - cyb;
-    return dx * dx + dy * dy <= r * r;
-  };
-  return rrect(196, 248, 316, 264, 8)   // handle
-    || rrect(168, 212, 196, 300, 10) || rrect(316, 212, 344, 300, 10)  // inner plates
-    || rrect(140, 192, 170, 320, 12) || rrect(342, 192, 372, 320, 12)  // outer plates
-    || rrect(126, 236, 142, 276, 6) || rrect(370, 236, 386, 276, 6);   // end caps
+// 4-point sparkle: astroid star |u|^p + |v|^p <= 1 (cusps point along the axes).
+function astroid(x, y, cx, cy, R, p) {
+  const u = Math.abs(x - cx) / R, v = Math.abs(y - cy) / R;
+  return Math.pow(u, p) + Math.pow(v, p) <= 1;
+}
+function inGlyph(x, y) { // coords in 0..512 space
+  return astroid(x, y, 244, 262, 152, 0.6)   // main sparkle
+    || astroid(x, y, 396, 138, 42, 0.6);      // small accent twinkle
 }
 function render(size) {
   const c1 = hex("#8b6cff"), c2 = hex("#5b3fd1"), white = [255, 255, 255];
@@ -59,7 +54,7 @@ function render(size) {
       let cov = 0;
       for (let sy = 0; sy < S; sy++) for (let sx = 0; sx < S; sx++) {
         const px = (x + (sx + 0.5) / S) / size * 512, py = (y + (sy + 0.5) / S) / size * 512;
-        if (inDumbbell(px, py)) cov++;
+        if (inGlyph(px, py)) cov++;
       }
       cov /= S * S;
       const i = (y * size + x) * 4;
