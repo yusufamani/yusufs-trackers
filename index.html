@@ -34,6 +34,19 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
+  html[data-theme="light"] {
+    --bg: #f4f6f9; --bg-elev: #ffffff; --card: #ffffff; --card-2: #eef1f5; --line: #dde1e8;
+    --text: #1a1d24; --muted: #59616e; --faint: #8893a1;
+    --accent: #6d49f0; --accent-2: #5a35d8; --accent-ink: #ffffff;
+    --good: #0f9d6b; --warn: #b9770a; --danger: #dc3b3b;
+  }
+  html[data-theme="light"] header.top {
+    background: linear-gradient(180deg, rgba(244,246,249,0.97), rgba(244,246,249,0.85));
+  }
+  html[data-theme="light"] nav.tabs { background: rgba(255,255,255,0.9); }
+  html[data-theme="light"] .launch-card.lift { background: linear-gradient(140deg, #efeaff, #ffffff); border-color: #dcd2ff; }
+  html[data-theme="light"] .launch-card.goal { background: linear-gradient(140deg, #e4f7f1, #ffffff); border-color: #c2e7dd; }
+  html[data-theme="light"] .launch-card.plan { background: linear-gradient(140deg, #fbeede, #ffffff); border-color: #f1dab9; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; height: 100%; }
   body {
@@ -1345,7 +1358,8 @@ function renderDateStrip(scope) {
 
 /* ---------- Launcher ---------- */
 function viewHome(m) {
-  setHeader({ title: "Dreamy", sub: "Become the dream" });
+  setHeader({ title: "Dreamy", sub: "Become the dream",
+    action: { label: getTheme() === "dark" ? "☀️" : "🌙", fn: toggleTheme } });
   const ov = overallProgress(todayISO());
   m.innerHTML = `<div class="view"><div class="launch">
     <button class="launch-card lift" data-mode="lift">
@@ -1637,7 +1651,21 @@ function viewGoalTrends(m) {
   m.querySelectorAll("[data-area]").forEach((b) => b.onclick = () => { goalDate = t; go({ name: "goalArea", areaId: b.dataset.area }); });
 }
 
+/* ---------- theme ---------- */
+function getTheme() { return localStorage.getItem("dreamy.theme") || "dark"; }
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  const mc = document.querySelector('meta[name="theme-color"]');
+  if (mc) mc.setAttribute("content", t === "light" ? "#f4f6f9" : "#0f1115");
+}
+function toggleTheme() {
+  const t = getTheme() === "dark" ? "light" : "dark";
+  localStorage.setItem("dreamy.theme", t);
+  applyTheme(t); render();
+}
+
 /* ---------- boot ---------- */
+applyTheme(getTheme());
 window.addEventListener("resize", () => { const s = document.getElementById("stage"); if (s) layoutRadial(s); });
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
